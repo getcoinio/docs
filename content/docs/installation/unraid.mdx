@@ -1,0 +1,38 @@
+---
+title: Unraid
+description: Install Coinio from the container template in the repository.
+---
+
+The template is [`deploy/unraid/coinio.xml`](https://raw.githubusercontent.com/getcoinio/coinio/main/deploy/unraid/coinio.xml).
+
+<Steps>
+<Step>
+
+Open the Unraid terminal and download the template into the user templates folder:
+
+```sh
+curl -fsSL -o /boot/config/plugins/dockerMan/templates-user/coinio.xml \
+  https://raw.githubusercontent.com/getcoinio/coinio/main/deploy/unraid/coinio.xml
+```
+
+</Step>
+<Step>
+
+Go to **Docker › Add Container** and pick **Coinio** from the template list.
+
+</Step>
+<Step>
+
+Check the fields and click **Apply**:
+
+| Field | Default | Notes |
+| --- | --- | --- |
+| Web UI | `8080` | Host port. |
+| Data | `/mnt/user/appdata/coinio` | Database and logos. |
+| Public URL | empty | Your https address, if you have one. Leave empty otherwise; with an `http://` address OAuth stays off. |
+| Time zone | `UTC` | Container clock only; set it to your own time zone, e.g. `Europe/Berlin`. Set Coinio's own time zone in the app. |
+
+</Step>
+</Steps>
+
+Open the WebUI from the container's menu and create your account.

@@ -1,0 +1,59 @@
+---
+title: Dokploy
+description: Add Coinio to Dokploy as a Docker Compose service and give it a domain.
+---
+
+[Dokploy](https://dokploy.com) puts its own Traefik in front of your apps, so Coinio does not need a published port here. Dokploy handles the domain and the https certificate.
+
+<Steps>
+<Step>
+
+In your project, create a **Compose** service (type *Docker Compose*) named `coinio`.
+
+</Step>
+<Step>
+
+Under **General**, choose the **Raw** provider and paste:
+
+```yaml title="docker-compose.yml"
+services:
+  coinio:
+    image: ghcr.io/getcoinio/coinio:latest
+    restart: unless-stopped
+    volumes:
+      - coinio-data:/data
+    environment:
+      TZ: ${TZ:-UTC}
+      COINIO_PUBLIC_URL: ${COINIO_PUBLIC_URL}
+
+volumes:
+  coinio-data:
+```
+
+This differs from the repository's compose file on purpose: a named volume instead of `./data` (Dokploy cleans up the app folder on deploys), no `ports` (Traefik routes the traffic) and no `container_name` (Dokploy names containers itself).
+
+</Step>
+<Step>
+
+Under **Domains**, add a domain for the `coinio` service with container port **8080** and HTTPS turned on.
+
+</Step>
+<Step>
+
+Under **Environment**, set the same address:
+
+```sh
+COINIO_PUBLIC_URL=https://coinio.example.com
+```
+
+</Step>
+<Step>
+
+Click **Deploy**, then open your domain and create your account.
+
+</Step>
+</Steps>
+
+## Backups
+
+The data is in the named volume `coinio-data`. You can add it to Dokploy's **Volume Backups**, or use the `tar` commands in [Update, backup and uninstall](/docs/maintenance#back-up). To update, click **Deploy** again; Dokploy pulls the `latest` image.

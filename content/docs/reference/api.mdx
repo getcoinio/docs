@@ -1,0 +1,100 @@
+---
+title: API
+description: The endpoints meant for use outside the web app.
+---
+
+Coinio's web app talks to its own internal API with a session cookie. Those endpoints can change between versions and are not documented as a public interface. Three endpoints are stable and meant for other tools:
+
+| Endpoint | Auth | Used by |
+| --- | --- | --- |
+| `GET /api/health` | none | Health checks |
+| `GET /api/widget` | API key | The [iPhone widget](/docs/integrations/iphone-widget) and your own scripts |
+| `POST /mcp` | API key or OAuth | [MCP clients](/docs/integrations/mcp) |
+
+## API keys
+
+Create keys in **Settings › Integrations › API keys** and send them as a bearer token:
+
+```sh
+COINIO_KEY=coi_read_...   # your key
+curl --oauth2-bearer "$COINIO_KEY" https://coinio.example.com/api/widget
+```
+
+- **Read only** keys (`coi_read_...`) can read. **Full access** keys (`coi_full_...`) can also change data through MCP.
+- A key is shown once. Coinio stores only a hash of it, and the list shows each key's prefix and when it was last used.
+- Revoking a key takes effect immediately.
+
+Errors are JSON:
+
+| Status | Body | Meaning |
+| --- | --- | --- |
+| 401 | `{"error":"unauthorized"}` | No `Authorization` header. |
+| 401 | `{"error":"invalid_token"}` | Unknown or revoked key. |
+| 403 | `{"error":"insufficient_scope"}` | The key does not have the access needed. |
+
+## Health
+
+```sh
+curl https://coinio.example.com/api/health
+```
+
+```json
+{ "ok": true, "version": "0.1.0" }
+```
+
+No authentication. The Docker image's health check calls it.
+
+## Widget
+
+`GET /api/widget` returns a short summary in your main currency: what is left this month, the monthly average and the next six payments (overdue ones first). Any key works.
+
+```json
+{
+  "base": "USD",
+  "leftThisMonthMinor": 9196,
+  "monthlyAverageMinor": 14344,
+  "ratesStale": false,
+  "items": [
+    {
+      "subscriptionId": 6,
+      "name": "Home internet",
+      "logoPath": null,
+      "dueDate": "2026-11-17",
+      "daysLeft": -2,
+      "amountMinor": 4499,
+      "currency": "USD",
+      "baseMinor": 4499,
+      "autoPay": false,
+      "variableAmount": false
+    }
+  ],
+  "digits": { "USD": 2 },
+  "generatedAt": "2026-11-19T22:33:10.000Z"
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `base` | Main currency. |
+| `leftThisMonthMinor` | Overdue plus still due this month, in the main currency. |
+| `monthlyAverageMinor` | Average monthly cost of active subscriptions. |
+| `ratesStale` | `true` when exchange rates are more than 4 days old. |
+| `items[].daysLeft` | Days until the due date; negative means overdue. |
+| `items[].amountMinor`, `currency` | Amount in the subscription's own currency. |
+| `items[].baseMinor` | The same in the main currency, or `null` when there is no exchange rate. |
+| `digits` | Decimal places of each currency in the response, for example `{ "USD": 2, "JPY": 0 }`. |
+| `generatedAt` | When the response was made (ISO 8601, UTC). |
+
+Amounts ending in `Minor` are integers in the currency's smallest unit: `9196` is 91.96 in USD, ¥9,196 in JPY.
+
+## MCP
+
+`POST /mcp` is a stateless MCP server over streamable HTTP. The tools and sign-in options are on the [MCP page](/docs/integrations/mcp#tools). A quick test with a key (`COINIO_KEY` set as above):
+
+```sh
+curl -X POST https://coinio.example.com/mcp \
+  --oauth2-bearer "$COINIO_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```

@@ -1,0 +1,35 @@
+---
+title: Changelog
+description: What changed in each release.
+---
+
+## 0.4.0
+
+- **Family & shared subscriptions.** Create a household, add member profiles with perspective-aware family roles (`Mom`, `Dad`, `Partner`, `Child`, etc.) or invite members with single-use links, split shared plans equally or by custom amounts, filter by "My share" or "Family total", while personal subscriptions stay private to their owner. Wallos `Paid By` now maps to household members on import.
+- **Passkeys (WebAuthn).** Register passkeys in Settings › Account for passwordless sign-in with Face ID, Touch ID, Windows Hello or hardware security keys.
+- **Security & UX polish.** Request-aware `Secure` session cookie flag, CSV formula neutralization, strict amount parsing, locale-aware capitalization on greetings and relative dates.
+- **Organization move.** Coinio moved to `github.com/getcoinio` and Docker images are now published at `ghcr.io/getcoinio/coinio`.
+
+## 0.2.0 – 0.3.0
+
+- Two-way Firefly III subscription and payment sync with match preview, auto-payment delay and duplicate protection.
+- Notifications by email, Telegram (with forum topics), Discord, Slack, ntfy, Gotify, Pushover, webhooks and Apprise, several at once.
+- Reminder days per billing cycle and per subscription, overdue alerts, weekly and monthly digests, free trial, budget and price change alerts.
+- Editable message templates in eight languages, with preview and test sends; a log of sent notifications with retries.
+- The Telegram bot saved in Settings becomes a Telegram channel; each subscription's "Remind me" days become its own reminder days.
+
+## 0.1.0
+
+The first public release.
+
+- Subscriptions with weekly, monthly and yearly cycles, automatic or manual payments, variable amounts, pause, skip and undo.
+- A catalog of 161 popular services; logos from Simple Icons, the site itself, Google's and DuckDuckGo's icon services, or your own upload.
+- Dashboard, calendar, payment history and 25-month reports.
+- Multiple currencies with daily ECB rates from Frankfurter.
+- Daily Telegram reminders.
+- Import from Wallos; export to CSV and JSON.
+- MCP server with OAuth (claude.ai, ChatGPT) and API keys (Claude Code, Cursor).
+- iPhone widget for Scriptable.
+- Themes, accent colour, six font pairs, dashboard card layout, custom CSS, sandboxed HTML cards and theme files.
+- English, Turkish, German, French, Spanish, Brazilian Portuguese, Simplified Chinese and Japanese.
+- One Docker image (`ghcr.io/getcoinio/coinio`) with an install script and templates for Docker Compose, Unraid, CasaOS and Portainer.

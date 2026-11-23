@@ -1,0 +1,38 @@
+---
+title: History and reports
+description: Every recorded payment, and your spending over the past and next twelve months.
+---
+
+## History
+
+**History** lists every payment record, newest first: paid (by you or automatically), skipped, and undone automatic payments. Filter by date range, subscription and status; the list shows the total paid in your main currency.
+
+From a record you can add the real amount charged or undo it. What undo does:
+
+- **A manual payment** is removed and its due date opens again. If it was the latest one, the subscription's next payment moves back to that date.
+- **An automatic payment** stays as *Undone* and does not count in totals. Coinio keeps the record so the automatic job does not create it again.
+
+Each subscription also has its own payment history on its page.
+
+## How totals are calculated
+
+| Figure | What goes in |
+| --- | --- |
+| Left this month | Overdue manual payments plus everything still due this month. |
+| Monthly average | Each active subscription's yearly cost divided by 12. A weekly subscription counts 52 times a year. |
+| Yearly total | Each active subscription's cost over a year. |
+| Paid this month | Payments recorded for due dates in this month. |
+
+Paused subscriptions and skipped periods count as nothing. Subscriptions whose currency has no exchange rate are left out, and the total says how many ([details](/docs/features/currencies#when-rates-are-old-or-missing)).
+
+## Reports
+
+**Reports** covers 25 months: the past 12, the current one and the next 12.
+
+- **Monthly spending:** past months from what was actually paid, future months projected from active subscriptions, and the current month with both.
+- **Paid in the last 12 months** and **expected in the next 12 months**.
+- **By category:** the monthly cost of each category.
+- **Most expensive:** your five costliest subscriptions per month.
+- **Share in foreign currency:** how much of your monthly cost is in currencies other than your main one.
+
+Paid amounts use what your card really charged when you entered it, and the daily rate otherwise.

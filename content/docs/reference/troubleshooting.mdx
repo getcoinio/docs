@@ -1,0 +1,78 @@
+---
+title: Troubleshooting
+description: Common problems and how to fix them.
+---
+
+Start with the logs; Coinio writes everything there:
+
+```sh
+docker logs coinio
+```
+
+## Port 8080 is already in use
+
+`docker run` fails with `Bind for 0.0.0.0:8080 failed: port is already allocated`. Publish another host port and keep the container port:
+
+```sh
+docker run -d --name coinio --restart unless-stopped \
+  -p 9000:8080 -v coinio-data:/data \
+  ghcr.io/getcoinio/coinio:latest
+```
+
+Coinio is then at `http://<server-ip>:9000`. With Compose, change `"8080:8080"` to `"9000:8080"`.
+
+## The container stops with `SQLITE_CANTOPEN`
+
+The app cannot write to `/data`. On start it takes over a root-owned data folder by itself, so this usually means something else blocks it:
+
+- On SELinux hosts (Fedora, RHEL), a bind-mounted folder needs the `:Z` flag, for example `./data:/data:Z`.
+- The folder sits on a network share or read-only disk that does not allow changing the owner. Use a named volume (`-v coinio-data:/data`) or a local folder.
+
+## Remote MCP clients cannot sign in
+
+The log shows `COINIO_PUBLIC_URL is not https: OAuth for remote MCP clients is disabled`. Set `COINIO_PUBLIC_URL` to your https address (see [Expose to the internet](/docs/expose)) and recreate the container. API keys work either way.
+
+## Exchange rates are missing or old
+
+The dashboard says rates are not up to date, or some subscriptions are "not in the total (no exchange rate)".
+
+- Check that the server can reach the rates service: `docker exec coinio wget -qO- "https://api.frankfurter.dev/v1/latest?from=USD&to=EUR"`.
+- Look for `fx: refresh ... failed` lines in the logs.
+- The currency may not be in the ECB's list. Those subscriptions stay out of totals until a rate exists. See [Currencies](/docs/features/currencies).
+
+Coinio retries on its own; there is nothing to restart.
+
+## The widget or claude.ai cannot connect
+
+- Both need Coinio on a public **https** address. A LAN address or plain http does not work from outside. See [Expose to the internet](/docs/expose).
+- claude.ai and ChatGPT also need `COINIO_PUBLIC_URL` set to that address. If the log shows `COINIO_PUBLIC_URL is not set: OAuth for remote MCP clients is disabled`, OAuth is off.
+- Open `https://<your-address>/api/health` from your phone's mobile data. If it does not load, the problem is the tunnel or proxy, not Coinio.
+- For the widget, check the key: `curl -H "Authorization: Bearer <key>" https://<your-address>/api/widget` must return JSON, not `invalid_token`.
+
+## Notifications do not arrive
+
+- Open the channel in **Settings › Notifications** and click **Send test**. The error shown is the service's own answer: `chat not found` means a wrong chat ID, `Unauthorized` a wrong token, `Invalid login` a wrong SMTP password.
+- Telegram: send your bot a message first; bots cannot start a conversation. For a forum group, check the topic ID.
+- **Recent notifications** at the bottom of the page lists failures with their error; temporary failures are retried for about 15 hours.
+- Reminders only go out on the configured days (by default 3 and 1 days before, 30, 7 and 1 for yearly) at the send time, in the time zone from **Settings › General**.
+
+## Too many login attempts
+
+After 10 failed logins from one IP address within 15 minutes, logins are refused for a while. Wait 15 minutes. Successful logins do not count.
+
+## I forgot my password
+
+There is no reset email: Coinio has no mail server and only one account. Set a new password from the server with the libraries already in the image. Replace the password (at least 10 characters) and run:
+
+```sh
+docker exec -e NEW_PASSWORD='your new password' coinio node --input-type=module -e "
+import Database from 'better-sqlite3';
+import { hash } from '@node-rs/argon2';
+const db = new Database('/data/coinio.db');
+const { changes } = db.prepare('UPDATE users SET password_hash = ?').run(await hash(process.env.NEW_PASSWORD));
+db.prepare('DELETE FROM sessions').run();
+console.log(changes ? 'Password changed.' : 'No account found.');
+"
+```
+
+This also signs out every device. Your username stays the same.

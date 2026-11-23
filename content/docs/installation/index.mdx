@@ -1,0 +1,27 @@
+---
+title: Installation
+description: Pick the method that fits your server. They all run the same image.
+---
+
+You need a Linux machine with Docker. A small VPS or a home server is plenty: Coinio is one Node.js process with an SQLite file.
+
+<Cards>
+  <Card title="Install script" href="/docs/installation/script" description="One command. Starts the container and can set up a Cloudflare Tunnel." />
+  <Card title="Docker" href="/docs/installation/docker" description="A single docker run command." />
+  <Card title="Docker Compose" href="/docs/installation/compose" description="The compose file from the repository." />
+  <Card title="Dokploy" href="/docs/installation/dokploy" description="Add Coinio as a Compose service and give it a domain." />
+  <Card title="Unraid" href="/docs/installation/unraid" description="Container template for the Docker tab." />
+  <Card title="CasaOS" href="/docs/installation/casaos" description="Custom install from the App Store." />
+  <Card title="Portainer" href="/docs/installation/portainer" description="App template URL." />
+</Cards>
+
+## What every method has in common
+
+| | |
+| --- | --- |
+| Image | `ghcr.io/getcoinio/coinio:latest` |
+| Port | `8080` (web app, API and MCP endpoint) |
+| Data | `/data` (database and logos) |
+| User | runs as UID `1000`, not root (it takes over a root-owned data folder on start) |
+
+After installing, open `http://<server-ip>:8080` and continue with [First run](/docs/first-run).

@@ -1,0 +1,71 @@
+---
+title: Expose to the internet
+description: Give Coinio an https address so the iPhone widget and AI connectors can reach it.
+---
+
+On your home network or over a VPN, `http://<server-ip>:8080` is enough. Two features need more:
+
+- **The iPhone widget** refreshes in the background from wherever your phone is.
+- **claude.ai and ChatGPT connectors** call your server from their own cloud, and their sign-in (OAuth) only works over https.
+
+Both need Coinio on a public https address. Pick one of the two ways below, then set that address as `COINIO_PUBLIC_URL`.
+
+## Cloudflare Tunnel
+
+A tunnel gives you https without opening ports on your router or firewall. Your domain has to be on Cloudflare.
+
+<Steps>
+<Step>
+
+In the Cloudflare dashboard, go to **Zero Trust › Networks › Tunnels**, create a tunnel (connector type *cloudflared*) and copy its token.
+
+</Step>
+<Step>
+
+**With the install script:** paste the token when it asks, and type the hostname you want (for example `coinio.example.com`). The script starts `cloudflared` as `coinio-tunnel` next to Coinio and sets `COINIO_PUBLIC_URL` for you.
+
+**Without the script:** put both containers on one network and start `cloudflared` yourself:
+
+```sh
+docker network create coinio
+docker network connect coinio coinio
+docker run -d --name coinio-tunnel --restart unless-stopped --network coinio \
+  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <your-token>
+```
+
+</Step>
+<Step>
+
+In the tunnel's settings, add a **public hostname**: your hostname, service type **HTTP**, URL **`coinio:8080`**. Cloudflare reaches Coinio by its container name over the shared network.
+
+</Step>
+</Steps>
+
+## Reverse proxy
+
+If the server already runs Caddy, nginx or Traefik with a certificate, point a hostname at port 8080. With Caddy:
+
+```text title="Caddyfile"
+coinio.example.com {
+	reverse_proxy localhost:8080
+}
+```
+
+Coinio trusts the first proxy in front of it for the client address (`X-Forwarded-For`). Keep it behind exactly one proxy, or put the tunnel in front instead.
+
+## Set the public address
+
+Tell Coinio where it lives. This turns on OAuth sign-in for remote MCP clients and marks the session cookie as secure.
+
+```sh
+COINIO_PUBLIC_URL=https://coinio.example.com
+```
+
+The install script sets it when you enter a hostname. For other methods, add it the way that method takes settings ([Docker](/docs/installation/docker#settings), [Compose](/docs/installation/compose#settings)) and recreate the container.
+
+<Callout type="warn">
+  Use the full `https://` address, without a path. With an `http://` address the app still starts, but OAuth for
+  remote MCP clients stays off and the log says so (only `http://localhost` is allowed, for development).
+</Callout>
+
+Without `COINIO_PUBLIC_URL` everything else still works, including the widget and MCP clients that use an [API key](/docs/integrations/mcp#with-an-api-key).

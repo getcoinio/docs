@@ -1,0 +1,46 @@
+---
+title: Configuration
+description: Environment variables, port and data folder.
+---
+
+Coinio is configured with environment variables. Everything else (currency, time zone, language, reminder time, appearance) is set in the app and stored in the database. An empty variable counts as not set.
+
+| Variable | Default | What it does |
+| --- | --- | --- |
+| `COINIO_PUBLIC_URL` | not set | The https address you reach Coinio at, for example `https://coinio.example.com`. Turns on OAuth for remote MCP clients and secure session cookies. Must be `https://` (or `http://localhost`); with an `http://` address OAuth stays off. |
+| `COINIO_TELEGRAM_BOT_TOKEN` | not set | Telegram bot token. With the chat ID, creates a Telegram channel on first start; then manage it in **Settings › Notifications**. |
+| `COINIO_TELEGRAM_CHAT_ID` | not set | Telegram chat ID for that channel. |
+| `COINIO_TELEGRAM_THREAD_ID` | not set | Optional topic ID for forum groups (Telegram's `message_thread_id`). |
+| `COINIO_BLOCK_PRIVATE_NETWORKS` | off | Set to `1` to stop notification channels (webhooks, ntfy, Gotify, Apprise, SMTP) and [Firefly III](/docs/integrations/firefly) from reaching loopback, private and link-local addresses. Turn it on if people you do not fully trust can edit notification channels. Leave it off if you send to a server or run Firefly III on your own network. |
+| `PORT` | `8080` | Port the server listens on inside the container. |
+| `COINIO_MAX_SUBSCRIPTIONS` | no limit | Most subscriptions one account may have. |
+| `COINIO_MAX_CHANNELS` | no limit | Most notification channels one account may have. |
+| `COINIO_MAX_API_KEYS` | no limit | Most API keys one account may have. |
+| `COINIO_DATA_DIR` | `/data` | Folder for the database (`coinio.db`) and logos (`logos/`). |
+| `COINIO_WEB_DIR` | built-in | Folder with the built web app. Only useful for development; the image ships with it. |
+
+The image sets `PORT=8080` and `COINIO_DATA_DIR=/data`. Leave both alone in Docker: to use another port, change the published port (`-p 9000:8080`), and to keep data elsewhere, mount another volume or folder at `/data`.
+
+## The data folder
+
+```text
+/data
+├── coinio.db        # SQLite database (WAL mode)
+├── coinio.db-wal
+├── coinio.db-shm
+└── logos/           # downloaded and uploaded logos
+```
+
+Everything is here: subscriptions, payments, settings, the account, API keys and OAuth clients. The container runs as user `node` (UID 1000), so the folder must be writable by UID 1000. See [backup and restore](/docs/maintenance#back-up).
+
+## Outgoing connections
+
+Coinio works without internet access, with fewer features. It connects out only for:
+
+| Host | For |
+| --- | --- |
+| `api.frankfurter.dev` | Daily exchange rates. |
+| `api.telegram.org` | Reminders, when configured. |
+| The websites of your subscriptions, `t1.gstatic.com`, `icons.duckduckgo.com` | Logos. |
+
+There is no telemetry and no update check.

@@ -1,0 +1,25 @@
+---
+title: Portainer
+description: Add Coinio to Portainer through an app template URL.
+---
+
+The template is [`deploy/portainer/template.json`](https://raw.githubusercontent.com/getcoinio/coinio/main/deploy/portainer/template.json).
+
+<Steps>
+<Step>
+
+In Portainer, go to **Settings › App Templates** and set the URL to:
+
+```text
+https://raw.githubusercontent.com/getcoinio/coinio/main/deploy/portainer/template.json
+```
+
+Note that this replaces the default template list. To keep both, add Coinio as a custom template instead.
+
+</Step>
+<Step>
+
+Open **App Templates**, pick **Coinio**, fill in **Public URL** if you have an https address (leave it empty otherwise) and deploy.
+
+</Step>
+</Steps>

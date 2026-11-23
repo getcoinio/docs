@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "---Get started---",
+    "index",
+    "hosted",
+    "installation",
+    "expose",
+    "first-run",
+    "maintenance",
+    "---Features---",
+    "...features",
+    "---Integrations---",
+    "...integrations",
+    "---Reference---",
+    "...reference"
+  ]
+}

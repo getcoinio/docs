@@ -1,0 +1,58 @@
+---
+title: Install script
+description: One command that starts Coinio and optionally a Cloudflare Tunnel.
+---
+
+```sh
+curl -fsSL https://getcoinio.me/install | sh
+```
+
+The script is short POSIX `sh`. [Read it](https://getcoinio.me/install) before you pipe it into a shell; it does nothing you could not type yourself.
+
+## What it does
+
+<Steps>
+<Step>
+
+**Checks Docker.** If Docker is missing it prints the install link and stops. It never installs Docker for you. If Docker is installed but not reachable, run the script as root or as a user in the `docker` group.
+
+</Step>
+<Step>
+
+**Asks about Cloudflare Tunnel.** Paste a tunnel token to get an https address without opening ports, or press Enter to skip. With a token it also asks for the public hostname (for example `coinio.example.com`) and passes it to Coinio as `COINIO_PUBLIC_URL`. See [Expose to the internet](/docs/expose#cloudflare-tunnel).
+
+</Step>
+<Step>
+
+**Starts Coinio.** It pulls the image and starts a container named `coinio` on a Docker network also called `coinio`:
+
+```sh
+docker run -d --name coinio --restart unless-stopped --network coinio \
+  -p 8080:8080 -v coinio-data:/data ghcr.io/getcoinio/coinio:latest
+```
+
+With a token it also starts `cloudflare/cloudflared` as `coinio-tunnel` on the same network.
+
+</Step>
+<Step>
+
+**Prints the address.** `http://<server-ip>:8080`, plus your https address if you set up the tunnel.
+
+</Step>
+</Steps>
+
+## Running it again
+
+The script never touches an existing install. If a container named `coinio` exists, it stops and prints the update commands instead:
+
+```sh
+docker pull ghcr.io/getcoinio/coinio:latest
+docker rm -f coinio
+curl -fsSL https://getcoinio.me/install | sh
+```
+
+Your data stays in the `coinio-data` volume. An existing `coinio-tunnel` container is kept as it is. More in [Update, backup and uninstall](/docs/maintenance).
+
+## Without a terminal prompt
+
+When the script cannot read from a terminal (for example in a provisioning tool), it skips the tunnel question and installs without it.

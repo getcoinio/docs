@@ -1,0 +1,31 @@
+---
+title: Currencies and exchange rates
+description: How amounts in different currencies are converted to your main currency.
+---
+
+Every subscription keeps the currency it is billed in. Totals, charts and reports are shown in your **main currency**, set in **Settings › General** (and in the welcome steps).
+
+Any ISO 4217 currency can be used. Amounts follow the currency's own decimals: USD and EUR have two, JPY and KRW have none (¥1,490), KWD and BHD have three.
+
+## Where rates come from
+
+Rates come from [Frankfurter](https://frankfurter.dev), which publishes the European Central Bank's reference rates. No API key is needed.
+
+- Rates are fetched **once a day** (your local day) for the currencies of your active subscriptions.
+- When you add a subscription in a currency Coinio has not seen yet, its rate is fetched **the same day**, within a minute.
+- If a fetch fails, the last known rate is kept and Coinio tries again later that day.
+- The ECB does not publish on weekends and holidays, so the rate date can be a few days old. That is normal.
+
+## When rates are old or missing
+
+If no rate could be fetched for more than **4 days**, the dashboard says *Exchange rates are not up to date; amounts are approximate*. Totals still use the last known rates.
+
+If a currency has **no rate at all** (the ECB does not publish it, or the server has never reached Frankfurter), its subscriptions are left out of totals instead of being guessed. Every total that is missing something says so, for example *2 subscriptions not in the total (no exchange rate)*. The subscriptions themselves still appear in lists and the calendar with their own amounts.
+
+Coinio needs outgoing internet access to `api.frankfurter.dev` for this. A server that only has subscriptions in its main currency never needs a rate.
+
+## What your card really charged
+
+Conversion with the daily rate is an estimate. When you mark a foreign-currency payment as paid, you can enter what your card was really charged in your main currency. History and reports use that amount for the payment.
+
+Under converted amounts the original is shown in small type (for example `$20.00`). Turn this off in **Settings › Appearance › Show the original currency**.

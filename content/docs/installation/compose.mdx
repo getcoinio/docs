@@ -1,0 +1,69 @@
+---
+title: Docker Compose
+description: Run Coinio with the compose file from the repository.
+---
+
+This is the `docker-compose.yml` in the repository root:
+
+```yaml title="docker-compose.yml"
+# Start with: docker compose up -d   then open http://localhost:8080
+services:
+  coinio:
+    image: ghcr.io/getcoinio/coinio:latest
+    # build: .   # uncomment to build from this folder instead of pulling the image
+    container_name: coinio
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ: ${TZ:-UTC}
+```
+
+It keeps the data in a `data` folder next to the compose file.
+
+## Start it
+
+<Steps>
+<Step>
+
+Make a folder and download the file:
+
+```sh
+mkdir coinio && cd coinio
+curl -fsSLO https://raw.githubusercontent.com/getcoinio/coinio/main/docker-compose.yml
+```
+
+</Step>
+<Step>
+
+Start it:
+
+```sh
+docker compose up -d
+```
+
+Open `http://<server-ip>:8080`.
+
+</Step>
+</Steps>
+
+## Settings
+
+Put [environment variables](/docs/reference/configuration) in a `.env` file next to the compose file; it is loaded when present:
+
+```sh title=".env"
+COINIO_PUBLIC_URL=https://coinio.example.com
+```
+
+Then run `docker compose up -d` again. The optional `env_file` entry needs Docker Compose 2.24 or newer.
+
+`TZ` defaults to `UTC`; set it to your own time zone, e.g. `TZ=Europe/Berlin` in `.env`. It only sets the container clock used in log lines. The time zone Coinio uses for "today", automatic payments and reminders is set in the app under **Settings › General**.
+
+## Build from source
+
+To run your own build, uncomment `build: .` in the compose file inside a clone of the repository and run `docker compose up -d --build`.

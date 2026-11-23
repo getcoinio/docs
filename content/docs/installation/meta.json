@@ -1,0 +1,4 @@
+{
+  "title": "Installation",
+  "pages": ["script", "docker", "compose", "dokploy", "unraid", "casaos", "portainer"]
+}

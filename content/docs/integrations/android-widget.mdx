@@ -1,0 +1,39 @@
+---
+title: Android widget
+description: A Home Screen widget on Android through the free ScriptWidget app.
+---
+
+On Android, Coinio's widget runs in [ScriptWidget](https://github.com/everettjf/scriptwidget), a free open-source app for JavaScript widgets (it also runs on iPhone, iPad, Mac and Linux). It shows what is left to pay this month and your next payments, like the [iPhone widget](/docs/integrations/iphone-widget).
+
+ScriptWidget only lets a widget reach the hosts it declares and does not allow private network addresses, so your Coinio needs an [https address on the internet](/docs/expose).
+
+## Set it up
+
+<Steps>
+<Step>
+
+Install ScriptWidget on your phone from its [releases](https://github.com/everettjf/scriptwidget/releases) (Android 13 or later).
+
+</Step>
+<Step>
+
+Add **Coinio** from ScriptWidget's **Gallery** to your Home Screen. If it is not listed yet, create a new widget and paste [`widget/scriptwidget/coinio`](https://github.com/getcoinio/coinio/tree/main/widget/scriptwidget/coinio) (`widget.json` and `main.jsx`).
+
+</Step>
+<Step>
+
+In Coinio, open **Settings › Integrations › Android widget** and tap **Prepare the widget**. Coinio makes a read-only key; tap **Copy parameter** and paste it into the widget's parameter in ScriptWidget.
+
+</Step>
+</Steps>
+
+### Your own server
+
+The Gallery version reaches only the free hosted Coinio (`app.getcoinio.me`). For your own server, remix the widget in ScriptWidget and add your host to `networkDomains` in `widget.json`. The parameter Coinio gives you then holds the address too: `https://coinio.example.com coi_read_…`.
+
+## How it behaves
+
+- Small and medium show the total and the next three payments, large the next six with "in 3 days" under each. Overdue payments are red. Lock Screen sizes work where the launcher supports them.
+- Without a connection it shows the last data it saw and marks it *offline* with the time of that data.
+- If the key is deleted in Coinio, it says *API key rejected*.
+- The widget only reads `/api/widget` with the read-only key: it can see your upcoming payments but cannot change anything.

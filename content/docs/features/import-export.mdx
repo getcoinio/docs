@@ -1,0 +1,66 @@
+---
+title: Import and export
+description: Bring subscriptions over from Wallos or another Coinio, and get your data out as CSV or JSON.
+---
+
+## Import from Wallos
+
+<Steps>
+<Step>
+
+In Wallos, open **Settings** and use **Export subscriptions** to download the JSON file.
+
+</Step>
+<Step>
+
+In Coinio, open **Settings › Import** (or choose **Import from Wallos** in the welcome steps) and pick the file. Files up to 8 MB are accepted.
+
+</Step>
+<Step>
+
+Coinio shows what it found and any warnings first. Nothing is saved yet. Check the list, then click **Import**. Either every row is imported or none is.
+
+</Step>
+</Steps>
+
+### How fields are mapped
+
+| Wallos | Coinio |
+| --- | --- |
+| Name | Name |
+| Price | Amount and currency. A currency code (`EUR`) or symbol (`₺`, `€`, `£`, `$`, `¥`, `₩`) is required; `$` is read as USD and `¥` as JPY, with a warning. |
+| Payment Cycle | `Daily` is not supported. `Every N weeks/months/years` keep their interval; `Every N days` works when N is a multiple of 7. |
+| Next Payment | Next payment |
+| Renewal | `Automatic` becomes charged automatically; anything else is manual. |
+| URL | Website, used for the logo. |
+| Category | Category (`No Category` becomes none). |
+| Payment Method, Notes | Same fields. |
+| Active | `No` imports the subscription as paused. |
+
+`Paid By`, `State`, `Notifications` and `Cancellation Date` are ignored. A row Coinio cannot read is skipped with a warning that says why; the rest still import.
+
+A manual subscription whose next payment is already in the past is imported as is and shows as overdue. You get a warning for each one so you can fix the date or mark it paid.
+
+## Import from another Coinio
+
+**Settings › Import** also reads Coinio's own export files, so you can move between installs, or from the [free hosted version](/docs/hosted) to your own server and back.
+
+- Choose the **Subscriptions** and **Payments** files from **Export** together (JSON or CSV) to bring the payment history along. The subscriptions file alone works too.
+- The hosted version's **Download my data** file (Settings › Account) works on its own.
+
+You see what will be imported before anything is saved. Subscriptions that already exist (same name, currency and billing cycle) are skipped, so importing the same files twice adds nothing. Notification channels, settings and uploaded logos are not part of the export; logos come back by themselves for subscriptions that have a website.
+
+## Export
+
+The **Export** menu in the top bar (on phones, on the **History** page) downloads:
+
+- **Subscriptions** or **Payments**,
+- as **CSV** or **JSON**.
+
+Files are named like `coinio-subscriptions-2026-11-20.csv`. Amounts are plain decimals (`1234.56`, `1490` for JPY) in each record's own currency. Subscription exports include paused subscriptions.
+
+CSV columns for subscriptions: `id`, `name`, `domain`, `amount`, `currency`, `variable_amount`, `cycle`, `interval_count`, `next_due`, `auto_pay`, `payment_method`, `category`, `notes`, `reminder_offsets` (days separated by `;`, empty for the defaults), `trial_ends_at`, `active`, `created_at`.
+
+CSV columns for payments: `id`, `subscription_id`, `subscription_name`, `due_date`, `paid_at`, `amount`, `currency`, `actual_base_amount`, `source`, `status`.
+
+Exports open in spreadsheets and other tools, and Settings › Import reads them back. To move a whole install to another server with everything (channels, keys, settings), copy the data volume instead ([backup and restore](/docs/maintenance#back-up)).

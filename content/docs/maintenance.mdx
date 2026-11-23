@@ -1,0 +1,85 @@
+---
+title: Update, backup and uninstall
+description: Keep Coinio current, back up the data volume and remove it cleanly.
+---
+
+All state is in `/data`. The examples use the names from the [install script](/docs/installation/script) and the [Docker](/docs/installation/docker) page: container `coinio`, volume `coinio-data`. With [Compose](/docs/installation/compose) the data is the `data` folder instead.
+
+## Update
+
+Database migrations run by themselves when the new version starts.
+
+<Tabs items={['Docker', 'Compose']}>
+<Tab value="Docker">
+
+Pull the new image, remove the container and start it again with the same command you installed with. The volume is kept.
+
+```sh
+docker pull ghcr.io/getcoinio/coinio:latest
+docker rm -f coinio
+docker run -d --name coinio --restart unless-stopped \
+  -p 8080:8080 -v coinio-data:/data \
+  ghcr.io/getcoinio/coinio:latest
+```
+
+If you installed with the script, run the script again instead of the last command. Add your `-e` settings back if you used any.
+
+</Tab>
+<Tab value="Compose">
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+</Tab>
+</Tabs>
+
+## Back up
+
+Stop the container so the database is not being written, archive `/data`, start it again:
+
+```sh
+docker stop coinio
+docker run --rm -v coinio-data:/data -v "$PWD":/backup alpine \
+  tar czf /backup/coinio-backup.tar.gz -C /data .
+docker start coinio
+```
+
+This writes `coinio-backup.tar.gz` to the current folder. It holds the database (including API keys, notification passwords and tokens, and sessions) and the logos, so store it like a password.
+
+With Compose, archive the folder directly: `docker compose stop`, `tar czf coinio-backup.tar.gz -C data .`, `docker compose start`.
+
+## Restore
+
+This replaces everything in the volume with the backup:
+
+```sh
+docker stop coinio
+docker run --rm -v coinio-data:/data -v "$PWD":/backup alpine \
+  sh -c 'rm -rf /data/* && tar xzf /backup/coinio-backup.tar.gz -C /data'
+docker start coinio
+```
+
+`tar` keeps the file owner (UID 1000) from the archive, so the app can write to the restored files.
+
+<Callout title="SELinux">
+  On Fedora, RHEL and other SELinux hosts, Docker cannot write to a folder from your home directory unless you add
+  `:z` to the bind mount: `-v "$PWD":/backup:z`.
+</Callout>
+
+## Uninstall
+
+```sh
+docker rm -f coinio
+docker volume rm coinio-data
+```
+
+The second line deletes your data; take a backup first. If you used the install script with a tunnel, also remove `coinio-tunnel` and the network:
+
+```sh
+docker rm -f coinio-tunnel
+docker network rm coinio
+```
+
+With Compose: `docker compose down`, then delete the folder. To remove the image as well: `docker image rm ghcr.io/getcoinio/coinio:latest`.

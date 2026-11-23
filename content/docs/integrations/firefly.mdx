@@ -1,0 +1,95 @@
+---
+title: Firefly III
+description: Keep your subscriptions and payments in sync with your own Firefly III, in both directions.
+---
+
+[Firefly III](https://www.firefly-iii.org) is a self-hosted personal finance manager. Coinio links each subscription to a Firefly III **bill** and keeps the two in step: change a subscription in either app and the other follows. Payments travel too: a transaction on the bill marks the payment paid in Coinio, and a payment you mark paid in Coinio becomes a withdrawal in Firefly III.
+
+Coinio never deletes anything on either side, and it never edits or deletes your Firefly III transactions.
+
+## Connect
+
+<Steps>
+<Step>
+
+In Firefly III, open **Options › Profile › OAuth** and under **Personal Access Tokens** choose **Create new token**. Name it `Coinio` and copy the token; Firefly III shows it only once.
+
+</Step>
+<Step>
+
+In Coinio, open **Settings › Integrations › Firefly III**. Enter the address you open Firefly III at, such as `https://firefly.example.com`, paste the token and click **Connect**. Coinio checks both with Firefly III before saving them.
+
+</Step>
+<Step>
+
+Choose a **Default account**: one of your Firefly III asset accounts. Payments you mark paid in Coinio go to this account. Once a subscription is linked, its edit form has a **Firefly III account** field for a different account for that subscription only.
+
+</Step>
+</Steps>
+
+Coinio sends requests to Firefly III from the server, not from your browser, so the address has to be reachable from where Coinio runs. If `COINIO_BLOCK_PRIVATE_NETWORKS` is on, Coinio cannot reach a Firefly III on a private network (loopback, `192.168.x.x`, `10.x.x.x` and so on), the same as notification channels; see [Configuration](/docs/reference/configuration). The hosted app at `app.getcoinio.me` can only reach a Firefly III with a public address.
+
+## The first sync
+
+Before anything changes, Coinio shows what the first sync will do, in three lists with a checkbox on each row:
+
+- **Same name in both:** a subscription and a bill with the same name get linked. Names match without regard to upper and lower case or spaces, so `YouTube Premium` matches `youtube premium`. Where both changed, the one edited most recently wins.
+- **Will be added to Firefly III:** subscriptions with no bill of that name.
+- **Will be added to Coinio:** bills with no subscription of that name.
+
+Uncheck a new record to leave it out of syncing; it stays where it is and Coinio does not touch it. You can bring it back later under **Left out of syncing** with **Include again**. Unchecking a pair leaves both records out of syncing, the same as unchecking two new records: nothing is linked and nothing is created for either.
+
+Only active records are created on the other side. A paused subscription or an inactive bill stays out until you turn it back on. Click **Start syncing** to run it.
+
+Subscriptions that come over from Firefly III are set as paid by hand, and their next due date is Firefly III's next expected payment (or, if Firefly III has none, the next date from the bill's start date).
+
+## What syncs
+
+| Coinio | Firefly III bill |
+| --- | --- |
+| Name | Name |
+| Amount | Maximum amount |
+| Variable amount | A range: minimum below maximum. An existing range is kept; a bill Coinio creates starts with the minimum equal to the maximum |
+| Currency | Currency |
+| Cycle: weekly, monthly or yearly, every N | Repeats weekly, monthly, quarterly, half-yearly or yearly, with skip. Every 3 months is quarterly, every 6 months half-yearly. |
+| Active | Active |
+| Notes | Notes |
+| Next due date | Bill date, only when a bill is created or its cycle changes |
+
+Website, payment method and reminders stay in Coinio. The category is not synced; it only goes along on the withdrawals Coinio creates.
+
+After the first sync, Coinio syncs every 15 minutes, and **Sync now** runs it at once. New active subscriptions and bills are added to the other side on the next sync.
+
+### Conflicts and deleting
+
+If a subscription and its bill both changed since the last sync, the side changed most recently wins.
+
+Deleting is never copied as a delete. If you delete a subscription in Coinio, its bill in Firefly III is set inactive; if you delete a bill in Firefly III, the subscription in Coinio is paused. The remaining record keeps its history and is no longer synced.
+
+## Payments
+
+**From Firefly III to Coinio.** A transaction attached to the bill (by a Firefly III rule, or by picking the bill on the transaction) marks the nearest unpaid payment within 7 days of its date as paid. Coinio records it with the source **Firefly III** and the transaction's amount.
+
+**From Coinio to Firefly III.** When a payment is marked paid in Coinio, by hand or automatically, Coinio first looks for a transaction on that bill within 7 days of the due date. If there is one, Coinio links the two and writes nothing. Otherwise it creates a withdrawal from the subscription's account (or the default account) to a payee with the subscription's name, attached to the bill. If the payment is in a different currency from the account, the amount is converted with the daily exchange rate and the original amount is kept as the foreign amount.
+
+Payments marked automatically wait two days before they are sent, so a transaction you enter or import into Firefly III yourself in the meantime is found and linked instead of a duplicate being written.
+
+- Payments made before you connected are not sent to Firefly III.
+- Undoing a payment in Coinio leaves its Firefly III transaction alone. Coinio does not pull that transaction back in to mark the payment paid again; paying the period again in Coinio, by hand or automatically, links it back to the same transaction.
+- Each Firefly III transaction counts once, so the same transaction never pays two periods.
+
+<Callout title="Recording the same payment twice">
+Coinio only checks Firefly III before it writes. Automatic payments wait two days first, so a transaction you enter or import in that window is found and linked. If your transaction reaches Firefly III later — after Coinio has already created its withdrawal — Firefly III has two transactions for it. Delete one of them in Firefly III.
+</Callout>
+
+## Disconnect
+
+**Disconnect** stops syncing and forgets which records are linked. Subscriptions, payments and everything in Firefly III stay as they are. Connecting again starts with a new first sync.
+
+## Troubleshooting
+
+- **"Firefly III didn't accept this token"**: the token was revoked or has expired. Coinio pauses syncing until you paste a new one under **New token** and click **Save token**; syncing then picks up where it stopped.
+- **"Couldn't reach Firefly III"**: check the address and that Firefly III is running, and open it from the machine Coinio runs on, not only from your own computer. A Docker container cannot reach another container at `localhost`; use the host's address or a shared Docker network. With `COINIO_BLOCK_PRIVATE_NETWORKS` on, a private address is refused.
+- **"No Firefly III at this address"**: use the address you open Firefly III at, without a page path after it.
+- **"Some payments weren't sent to Firefly III because their account wasn't found"**: the chosen account was deleted in Firefly III, or no default account is set. Choose another default account, or another account in the subscription's form.
+- **"…there's no exchange rate for their currency yet"**: the payment and the account use different currencies and today's rates are not in yet. Coinio tries again on the next sync.

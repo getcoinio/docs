@@ -1,0 +1,40 @@
+---
+title: Introduction
+description: Coinio is a self-hosted subscription and bill tracker. One Docker container, one data folder, your server.
+---
+
+Coinio keeps every recurring payment on one page: streaming, cloud storage, the gym, rent, the domain you renew once a year. You see what is due this week, what is left to pay this month and what the whole year costs, converted to your main currency.
+
+It runs as a single container on a machine you control. There is no account on someone else's server, no telemetry and no paid tier.
+
+<Screenshot name="dashboard" alt="The Coinio dashboard with sample data: money left to pay this month, a spending chart and upcoming payments" />
+
+## What it does
+
+- **Subscriptions with real billing cycles.** Weekly, monthly or yearly, every N cycles, paid automatically or by hand. Mark a payment as paid, skip a period or pause a subscription; the history stays.
+- **A built-in catalog.** 161 popular services with their websites, so the logo comes by itself. Any other site works too.
+- **Calendar and reminders.** Payment days months ahead, and reminders by email, Telegram, Discord, Slack, ntfy, Gotify, Pushover, webhooks or Apprise.
+- **Many currencies.** Each subscription keeps its own currency; totals are converted with daily exchange rates.
+- **History and reports.** What you paid in the last 12 months and what to expect in the next 12, by category.
+- **Import and export.** Bring your data over from Wallos; export subscriptions and payments as CSV or JSON.
+- **AI assistants (MCP).** Claude, ChatGPT and other MCP clients can read and update your subscriptions.
+- **iPhone widget.** Home Screen and Lock Screen widgets through Scriptable.
+- **Your own look.** Themes, accent colour, fonts, dashboard cards, custom CSS and your own HTML cards.
+
+## How it runs
+
+Every install method starts the same image, `ghcr.io/getcoinio/coinio:latest`:
+
+- the web app and API listen on port **8080** inside the container;
+- all data lives in **`/data`**: an SQLite database (`coinio.db`) and the downloaded logos;
+- one account per install, created the first time you open it.
+
+Back up `/data` and you have backed up everything.
+
+## Next steps
+
+<Cards>
+  <Card title="Install" href="/docs/installation" description="One-line script, Docker, Compose and platform templates." />
+  <Card title="Expose to the internet" href="/docs/expose" description="Get an https address for the widget and AI connectors." />
+  <Card title="First run" href="/docs/first-run" description="Create your account and pick a currency." />
+</Cards>

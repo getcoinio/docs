@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* Coinio brand: indigo accent (#4f5bd5, #8e96ff on dark) and the cool dark tones of the app's Night theme. */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-jakarta), var(--font-geist-sans), ui-sans-serif, sans-serif;
+
+  --color-fd-background: #f8f8fb;
+  --color-fd-foreground: #16172b;
+  --color-fd-muted: #f0f0f6;
+  --color-fd-muted-foreground: #575a72;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #16172b;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #16172b;
+  --color-fd-border: #e5e6ef;
+  --color-fd-primary: #4f5bd5;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f2f2f8;
+  --color-fd-secondary-foreground: #16172b;
+  --color-fd-accent: color-mix(in oklab, #4f5bd5 10%, transparent);
+  --color-fd-accent-foreground: #16172b;
+  --color-fd-ring: #4f5bd5;
+}
+
+.dark {
+  --color-fd-background: #0f1117;
+  --color-fd-foreground: #eceef4;
+  --color-fd-muted: #1b1f2a;
+  --color-fd-muted-foreground: #a3a8b8;
+  --color-fd-popover: #151821;
+  --color-fd-popover-foreground: #eceef4;
+  --color-fd-card: #151821;
+  --color-fd-card-foreground: #eceef4;
+  --color-fd-border: #232836;
+  --color-fd-primary: #8e96ff;
+  --color-fd-primary-foreground: #0f1117;
+  --color-fd-secondary: #1b1f2a;
+  --color-fd-secondary-foreground: #eceef4;
+  --color-fd-accent: color-mix(in oklab, #8e96ff 14%, transparent);
+  --color-fd-accent-foreground: #eceef4;
+  --color-fd-ring: #8e96ff;
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: #1b1f2a;
+  --color-fd-secondary: #1b1f2a;
+  --color-fd-muted-foreground: #a3a8b8;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

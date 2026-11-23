@@ -1,0 +1,116 @@
+---
+title: Notifications
+description: Reminders, digests and alerts by email, Telegram, Discord, Slack, ntfy, Gotify, Pushover, webhooks or Apprise.
+---
+
+Coinio tells you before a payment is due, when a manual payment is late, when a free trial is about to end, when the month goes over budget and when a price changes. Set it all up in **Settings › Notifications**.
+
+## Channels
+
+Add as many channels as you like; every enabled channel gets every message. Each has its own on/off switch and a **Send test** button. When a test fails, Coinio shows the exact answer of the service (for example `HTTP 400: Bad Request: chat not found`).
+
+| Channel | What you need |
+| --- | --- |
+| Email | An SMTP server: host, port, security (STARTTLS on 587, TLS on 465, or none), optional username and password, from and to addresses. |
+| Telegram | A bot token and chat ID, and a topic ID for forum groups. See below. |
+| Discord | A channel webhook URL (Channel settings › Integrations › Webhooks). |
+| Slack | An incoming webhook URL. |
+| ntfy | The server (`https://ntfy.sh` or your own), a topic, and an access token if the topic is protected. |
+| Gotify | Your server URL and an application token. |
+| Pushover | Your user key and an application token. |
+| Webhook | Any URL, the HTTP method, optional headers (one `Name: value` per line) and an optional JSON body template. |
+| Apprise | The URL of an [Apprise API](https://github.com/caronc/apprise-api) server and one or more Apprise URLs, which reach 100+ services. |
+
+Passwords, tokens, webhook URLs, header values and Apprise URLs are stored on your server and never sent back to the browser: the form shows "Saved", and you type a new value only to replace it.
+
+Without a body template, a webhook receives:
+
+```json
+{ "event": "reminder", "title": "Netflix is due in 3 days", "body": "Netflix · $15.99 …", "url": "https://…/subscriptions/4", "data": { "name": "Netflix", "amount": "$15.99", … } }
+```
+
+With a template, write the JSON yourself; values such as `{{title}}`, `{{body}}` and `{{name}}` are escaped for JSON:
+
+```json
+{ "text": "{{title}}: {{amount}} on {{dueDate}}" }
+```
+
+### Telegram
+
+<Steps>
+<Step>
+
+In Telegram, talk to [@BotFather](https://t.me/BotFather), send `/newbot` and copy the **bot token**.
+
+</Step>
+<Step>
+
+Send any message to your bot (or add it to a group). Then open this address with your token in it and find `"chat":{"id":...}`:
+
+```text
+https://api.telegram.org/bot<your-token>/getUpdates
+```
+
+That number is the **chat ID**. Group IDs start with a minus sign.
+
+</Step>
+<Step>
+
+**Groups with topics (forums):** to post into one topic, copy the link of any message in that topic (right click or long press › Copy link). It looks like `https://t.me/c/<chat>/<topic>/<message>`; the middle number is the **topic ID**. Leave the field empty to post in the general topic or in a normal chat.
+
+</Step>
+<Step>
+
+In **Settings › Notifications**, click **Add channel**, choose Telegram, fill in the fields and click **Send test**.
+
+</Step>
+</Steps>
+
+You can also set the bot with [environment variables](/docs/reference/configuration): `COINIO_TELEGRAM_BOT_TOKEN`, `COINIO_TELEGRAM_CHAT_ID` and optionally `COINIO_TELEGRAM_THREAD_ID` (the topic ID). On the first start that sees them, Coinio creates a Telegram channel from them; after that you manage it in the app, and deleting it does not bring it back.
+
+A bot saved in Settings by an older version becomes a Telegram channel automatically when you upgrade.
+
+## Reminders
+
+At the **send time** (default 09:00, in the time zone from **Settings › General**) Coinio sends one message per payment that is due in one of the reminder days:
+
+- **Monthly and weekly:** 3 days and 1 day before.
+- **Yearly:** 30, 7 and 1 days before.
+
+Change these defaults per billing cycle, up to 60 days before. Add **0** for a message on the due day itself; for automatic payments it says the amount is charged today. A subscription can use its own days instead: turn off **Use default reminders** in its form.
+
+Already paid or skipped due dates get no reminder. Paused subscriptions get nothing.
+
+**Overdue alert:** the day after a manual payment's due date, if it is still not marked as paid, you get one message. Automatic payments are marked paid on their own, so they never get one.
+
+## Digests
+
+Optional summaries at the send time: **weekly** on the day you choose (the next 7 days) and **monthly** on the day of the month you choose (the month ahead; months that are too short use their last day). They list what is due with the total in your main currency, plus anything overdue.
+
+## Alerts
+
+- **Free trial ending:** give a subscription a **Free trial ends** date, and Coinio alerts you that many days before (3 by default).
+- **Monthly budget:** set a budget in your main currency. Once a month, when what you paid plus what is still due this month goes over it, you get one alert.
+- **Price change:** when you change a subscription's amount, or record a manual payment that differs from the usual amount (not for variable bills).
+
+## Message templates
+
+Every message type has a template you can edit: reminder, due today, overdue, digest, trial ending, over budget, price change and test. Each has a title (the email subject) and a body. The defaults are written in each of the app's eight languages and follow the language in **Settings › General** until you change them; **Reset to default** brings them back.
+
+Click a variable to insert it. The preview uses sample data, and **Send test to** sends the template, with sample data, to one channel.
+
+| Syntax | Meaning |
+| --- | --- |
+| `{{name}}` | A value. Unknown names print nothing. |
+| `{{#items}}…{{/items}}` | Repeats for every item of a list (digest). |
+| `{{#notes}}…{{/notes}}` | Shown only when the value is set (or true). |
+| `{{^autoPay}}…{{/autoPay}}` | Shown only when the value is empty or false. |
+| `**bold**`, `_italic_`, `[text](url)` | Formatting in the body. |
+
+Templates never run code. Telegram, Discord, Slack, ntfy, Gotify, Pushover and Apprise get the formatting in their own syntax, email gets HTML and plain text, and a webhook gets plain text inside JSON.
+
+Variables for one payment: `name`, `amount` (in its own currency), `amountMain` (in your main currency, only when different), `dueDate`, `when` ("in 3 days", "tomorrow"), `daysLeft`, `cycle`, `category`, `paymentMethod`, `notes`, `website`, `link` (the subscription in Coinio, needs `COINIO_PUBLIC_URL`) and `autoPay`. Digests add `period`, `total`, `items`, `hasOverdue`, `overdue` and `overdueTotal`; trials `trialEnd`; budget alerts `month`, `budget`, `spent`, `projected` and `over`; price changes `oldAmount`, `newAmount`, `change` and `paidDate`.
+
+## Delivery and history
+
+Every message is written to a log before it is sent, keyed by subscription, due date, type, reminder day and channel, so nothing goes out twice, even after a restart. A failure that may pass (network error, server error, rate limit) is retried after 1, 5, 30, 120 and 720 minutes; a rejected token or address is not. **Recent notifications** at the bottom of the page shows what was sent and what failed, with the error.

@@ -1,0 +1,53 @@
+---
+title: iPhone widget
+description: Home Screen and Lock Screen widgets through the free Scriptable app.
+---
+
+The widget shows what is left to pay this month and your next payments. It comes in all Home Screen sizes (small, medium, large) and the Lock Screen's inline, rectangular and circular slots. No App Store app of ours is needed; it runs in [Scriptable](https://apps.apple.com/app/scriptable/id1405459188).
+
+Your phone has to reach Coinio wherever it is, so you need an [https address](/docs/expose). A LAN address only works while you are at home.
+
+## Set it up
+
+<Steps>
+<Step>
+
+Install **Scriptable** from the App Store.
+
+</Step>
+<Step>
+
+On your iPhone, open Coinio at **Settings › Integrations › iPhone widget** and tap **Prepare the widget**. Coinio makes a read-only key and writes it, with your server address, into the script. Tap **Copy script**. (On a computer, scan the QR code there to open the page on your phone.)
+
+</Step>
+<Step>
+
+In Scriptable, tap **+** to make a new script and paste.
+
+</Step>
+<Step>
+
+Long-press the Home Screen (or **Lock Screen › Customize**), add a **Scriptable** widget, tap it and choose the script.
+
+</Step>
+</Steps>
+
+### By hand
+
+You can also create a **Read only** key under **Settings › Integrations › API keys**, paste [`widget/coinio-widget.js`](https://raw.githubusercontent.com/getcoinio/coinio/main/widget/coinio-widget.js) into Scriptable and fill in the two lines at the top:
+
+```js
+const SERVER_URL = 'https://coinio.example.com'; // where you open the app, no trailing slash
+const API_KEY = 'coi_read_…'; // Settings › Integrations › API keys › Read only
+```
+
+## How it behaves
+
+- It refreshes about every 30 minutes; iOS decides the exact timing.
+- It shows up to six items, overdue ones first, each with its due date and amount: one on small, four on medium, six on large (with "in 3 days" under each). Overdue payments are red on the Home Screen and marked ⚠ on the Lock Screen, which is drawn in one colour.
+- On the Lock Screen, inline shows the next payment, rectangular the next three, circular the days left until the next one.
+- Without a connection it shows the last data it saw and marks it *offline* with the time of that data. With nothing saved yet it says *Can't reach Coinio*.
+- If the key is wrong or revoked it says *API key rejected* instead of showing old data.
+- Text follows the phone's language (English, Turkish, German, French, Spanish, Brazilian Portuguese, Simplified Chinese and Japanese; English for any other).
+
+The widget reads `GET /api/widget` with the key; see [API](/docs/reference/api#widget). A read-only key cannot change anything, so a lost phone cannot edit your data. Revoke the key in **Settings › Integrations › API keys** if you lose it.
