@@ -6,7 +6,11 @@ Documentation site for [Coinio](https://github.com/getcoinio/coinio), served at 
 
 [Documentation](https://docs.getcoinio.me/docs) · [Website](https://getcoinio.me) · [Live demo](https://getcoinio.me/demo/) · [Free hosted app](https://app.getcoinio.me/signup)
 
-![Coinio documentation preview](public/screenshots/dashboard-light.webp)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/repo-banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="public/repo-banner-light.png">
+  <img src="public/repo-banner-dark.png" alt="Coinio Documentation">
+</picture>
 
 ## What is in this repo
 
